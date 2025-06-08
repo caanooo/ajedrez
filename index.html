@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juego de Ajedrez con Emojis</title>
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
-    
     <style>
         /* CSS Integrado */
         body {
@@ -24,7 +23,7 @@
             text-align: center;
             color: #dcdcdc;
         }
-        
+
         .board-container {
             width: 90vw;
             max-width: 500px;
@@ -54,7 +53,7 @@
             color: #ffffff;
             min-height: 25px;
         }
-        
+
         #pgn {
             font-family: 'Courier New', Courier, monospace;
             background-color: #312e2b;
@@ -66,10 +65,13 @@
         }
 
         /* --- INICIO DE TU CÓDIGO CSS PARA PIEZAS EMOJI --- */
-        .piece-417db img { /* La clase .piece-417db es generada por chessboard.js */
+        /* La clase .piece-417db es generada por chessboard.js */
+        /* Aseguramos que la imagen generada por chessboard.js no se muestre */
+        .piece-417db img {
             display: none;
         }
 
+        /* Estilos para el pseudo-elemento que contendrá el emoji */
         .piece-417db::after {
             font-size: 40px; /* Ajusta el tamaño de la pieza aquí */
             font-weight: bold; /* Algunas fuentes se ven mejor en negrita */
@@ -80,7 +82,7 @@
             user-select: none;
             pointer-events: none;
         }
-        
+
         /* Piezas Blancas */
         .wK.piece-417db::after { content: "♔"; }
         .wQ.piece-417db::after { content: "♕"; }
@@ -97,17 +99,14 @@
         .bN.piece-417db::after { content: "♞"; }
         .bP.piece-417db::after { content: "♟"; }
         /* --- FIN DE TU CÓDIGO CSS --- */
-
     </style>
 </head>
 <body>
-
     <h1>Juego de Ajedrez (Versión Emoji)</h1>
-
     <div class="board-container">
         <div id="myBoard"></div>
     </div>
-    
+
     <div class="info">
         <h2>Estado del Juego</h2>
         <p id="status"></p>
@@ -115,8 +114,8 @@
         <div id="pgn"></div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" 
-            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
             crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.min.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
@@ -171,20 +170,22 @@
                 $pgn.html(game.pgn());
             }
 
-            // --- INICIO DE TU MODIFICACIÓN JS ---
+            // --- INICIO DE LA MODIFICACIÓN CLAVE ---
+            // Le decimos a chessboard.js que use una imagen transparente
+            // Esto hace que la librería no intente cargar sus imágenes por defecto,
+            // permitiendo que nuestro CSS con los emojis se vea.
             var config = {
                 draggable: true,
                 position: 'start',
                 onDragStart: onDragStart,
                 onDrop: onDrop,
                 onSnapEnd: onSnapEnd,
-                // Usar un pixel transparente para que el CSS pueda dibujar las piezas
                 pieceTheme: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
             };
-            // --- FIN DE TU MODIFICACIÓN JS ---
-            
+            // --- FIN DE LA MODIFICACIÓN CLAVE ---
+
             board = Chessboard('myBoard', config);
-            
+
             $(window).resize(function(){
                 board.resize();
             });
@@ -192,6 +193,5 @@
             updateStatus();
         });
     </script>
-
 </body>
 </html>
