@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Ajedrez con Emojis</title>
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    
+    <style>
+        /* CSS Integrado */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #312e2b;
+            color: #f0f0f0;
+            padding-top: 20px;
+            margin: 0;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #dcdcdc;
+        }
+        
+        .board-container {
+            width: 90vw;
+            max-width: 500px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #myBoard {
+            width: 100%;
+        }
+
+        .info {
+            text-align: center;
+            width: 90vw;
+            max-width: 500px;
+            background-color: #4a4744;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #status {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffffff;
+            min-height: 25px;
+        }
+        
+        #pgn {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #312e2b;
+            padding: 10px;
+            border-radius: 3px;
+            word-wrap: break-word;
+            min-height: 40px;
+            color: #c8c8c8;
+        }
+
+        /* --- INICIO DE TU CÓDIGO CSS PARA PIEZAS EMOJI --- */
+        .piece-417db img { /* La clase .piece-417db es generada por chessboard.js */
+            display: none;
+        }
+
+        .piece-417db::after {
+            font-size: 40px; /* Ajusta el tamaño de la pieza aquí */
+            font-weight: bold; /* Algunas fuentes se ven mejor en negrita */
+            line-height: 1;
+            display: block;
+            text-align: center;
+            /* Estos son importantes para que el drag and drop funcione */
+            user-select: none;
+            pointer-events: none;
+        }
+        
+        /* Piezas Blancas */
+        .wK.piece-417db::after { content: "♔"; }
+        .wQ.piece-417db::after { content: "♕"; }
+        .wR.piece-417db::after { content: "♖"; }
+        .wB.piece-417db::after { content: "♗"; }
+        .wN.piece-417db::after { content: "♘"; }
+        .wP.piece-417db::after { content: "♙"; }
+
+        /* Piezas Negras */
+        .bK.piece-417db::after { content: "♚"; }
+        .bQ.piece-417db::after { content: "♛"; }
+        .bR.piece-417db::after { content: "♜"; }
+        .bB.piece-417db::after { content: "♝"; }
+        .bN.piece-417db::after { content: "♞"; }
+        .bP.piece-417db::after { content: "♟"; }
+        /* --- FIN DE TU CÓDIGO CSS --- */
+
+    </style>
+</head>
+<body>
+
+    <h1>Juego de Ajedrez (Versión Emoji)</h1>
+
+    <div class="board-container">
+        <div id="myBoard"></div>
+    </div>
+    
+    <div class="info">
+        <h2>Estado del Juego</h2>
+        <p id="status"></p>
+        <h2>Movimientos (PGN)</h2>
+        <div id="pgn"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" 
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" 
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+
+    <script>
+        // JavaScript Integrado
+        $(document).ready(function() {
+            var board = null;
+            var game = new Chess();
+            var $status = $('#status');
+            var $pgn = $('#pgn');
+
+            function onDragStart(source, piece, position, orientation) {
+                if (game.game_over()) return false;
+                if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+                    (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+                    return false;
+                }
+            }
+
+            function onDrop(source, target) {
+                var move = game.move({
+                    from: source,
+                    to: target,
+                    promotion: 'q'
+                });
+                if (move === null) return 'snapback';
+                updateStatus();
+            }
+
+            function onSnapEnd() {
+                board.position(game.fen());
+            }
+
+            function updateStatus() {
+                var status = '';
+                var moveColor = 'Blancas';
+                if (game.turn() === 'b') {
+                    moveColor = 'Negras';
+                }
+                if (game.in_checkmate()) {
+                    status = 'Juego Terminado, ' + moveColor + ' en Jaque Mate.';
+                } else if (game.in_draw()) {
+                    status = 'Juego Terminado, Empate.';
+                } else {
+                    status = 'Mueven las ' + moveColor;
+                    if (game.in_check()) {
+                        status += ', ' + moveColor + ' están en Jaque.';
+                    }
+                }
+                $status.html(status);
+                $pgn.html(game.pgn());
+            }
+
+            // --- INICIO DE TU MODIFICACIÓN JS ---
+            var config = {
+                draggable: true,
+                position: 'start',
+                onDragStart: onDragStart,
+                onDrop: onDrop,
+                onSnapEnd: onSnapEnd,
+                // Usar un pixel transparente para que el CSS pueda dibujar las piezas
+                pieceTheme: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
+            };
+            // --- FIN DE TU MODIFICACIÓN JS ---
+            
+            board = Chessboard('myBoard', config);
+            
+            $(window).resize(function(){
+                board.resize();
+            });
+
+            updateStatus();
+        });
+    </script>
+
+</body>
+</html>
